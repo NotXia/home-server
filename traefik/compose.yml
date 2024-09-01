@@ -1,0 +1,36 @@
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      # - --log.level=DEBUG
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --entryPoints.https.address=:443
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      - --certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik-dash.service=api@internal
+      - traefik.http.services.traefik-dash.loadbalancer.server.port=8080
+      - traefik.http.routers.traefik-dash.rule=Host(`traefik.local`)
+      - traefik.http.routers.traefik-dash.entrypoints=http
+      - traefik.http.routers.traefik-dash.middlewares=traefik-dash-auth
+      - traefik.http.middlewares.traefik-dash-auth.basicauth.users=${TRAEFIK_USER}:${TRAEFIK_PWD}
+
+networks:
+  traefik-net:
+    external: false
+    name: traefik-net
