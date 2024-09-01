@@ -1,6 +1,7 @@
 services:
   website:
     build: ./notxia.github.io
+    container_name: website
     networks:
       - traefik-net
     labels:
@@ -9,7 +10,7 @@ services:
       - traefik.http.routers.website-http.service=website-http
       - traefik.http.services.website-http.loadbalancer.server.port=3000
       - traefik.http.middlewares.redirect-https.redirectscheme.scheme=https
-      - "traefik.http.middlewares.redirect-https.redirectscheme.permanent=true"
+      - traefik.http.middlewares.redirect-https.redirectscheme.permanent=true
       - traefik.http.routers.website-http.middlewares=redirect-https
       - traefik.http.routers.website-http.rule=Host(`${DOMAIN}`)
       - traefik.http.routers.website-http.entrypoints=http
