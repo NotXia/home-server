@@ -17,6 +17,9 @@ services:
       traefik-net:
       pihole-net:
         ipv4_address: 172.0.0.2
+    dns:
+      - ${PIHOLE_PUBLIC_DNS}
+      - 127.0.0.11
     labels:
       - traefik.enable=true
       - traefik.http.services.pihole.loadbalancer.server.port=80
