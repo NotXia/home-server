@@ -2,6 +2,7 @@ services:
   website:
     build: ./notxia.github.io
     container_name: website
+    restart: unless-stopped
     networks:
       - traefik-net
     labels:
