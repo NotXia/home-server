@@ -1,0 +1,29 @@
+services:
+  wireguard:
+    image: linuxserver/wireguard:latest
+    container_name: wireguard
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    ports:
+      - 51820:51820/udp
+    networks:
+      - pihole-net
+    dns:
+      - 172.0.0.2
+    environment:
+      - PUID=${WG_UID}
+      - PGID=${WG_GID}
+      - TZ=${TIMEZONE}
+      - PEERS=${WG_PEERS}
+      - SERVERURL=${DOMAIN}
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=10.13.13.0
+    volumes:
+      - ./config:/config
+
+networks:
+  pihole-net:
+    external: true

@@ -30,6 +30,11 @@ if prompt_y_n "Start Pi-hole? [Y/n]" 0; then
     ln_env_and_start_compose
 fi
 
+if prompt_y_n "Start WireGuard? [Y/n]" 0; then
+    cd wireguard
+    ln_env_and_start_compose
+fi
+
 if prompt_y_n "Start website (I mean, you probably don't want this but who am I to judge)? [y/N]" 1; then
     cd website
     ln_env_and_start_compose
