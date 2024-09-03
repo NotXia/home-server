@@ -14,11 +14,11 @@ services:
     dns:
       - 172.0.0.2
     environment:
-      - PUID=${WG_UID}
-      - PGID=${WG_GID}
+      - PUID=${USER_UID}
+      - PGID=${USER_GID}
       - TZ=${TIMEZONE}
       - PEERS=${WG_PEERS}
-      - SERVERURL=${DOMAIN}
+      - SERVERURL=${PUBLIC_DOMAIN}
       - PEERDNS=auto
       - INTERNAL_SUBNET=10.13.13.0
     volumes:

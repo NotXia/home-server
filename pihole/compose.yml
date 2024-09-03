@@ -18,16 +18,30 @@ services:
       pihole-net:
         ipv4_address: 172.0.0.2
     dns:
-      - ${PIHOLE_PUBLIC_DNS}
       - 127.0.0.11
+      - 127.0.0.1
+    extra_hosts:
+      - ${TRAEFIK_SUBDOMAIN}.${LOCAL_DOMAIN}:${LOCAL_IP}
+      - ${PIHOLE_SUBDOMAIN}.${LOCAL_DOMAIN}:${LOCAL_IP}
+      - ${VW_SUBDOMAIN}.${LOCAL_DOMAIN}:${LOCAL_IP}
+
     labels:
       - traefik.enable=true
       - traefik.http.services.pihole.loadbalancer.server.port=80
-      - traefik.http.routers.pihole.rule=Host(`pihole.local`)
-      - traefik.http.routers.pihole.entrypoints=http
-      - traefik.http.middlewares.pihole-admin-redir.redirectregex.regex=^http://pihole.local/?$$
-      - traefik.http.middlewares.pihole-admin-redir.redirectregex.replacement=http://pihole.local/admin/
-      - traefik.http.routers.pihole.middlewares=pihole-admin-redir
+
+      - traefik.http.routers.pihole-http.rule=Host(`${PIHOLE_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.pihole-http.entrypoints=http
+      - traefik.http.routers.pihole-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.pihole-https.service=pihole
+      - traefik.http.routers.pihole-https.rule=Host(`${PIHOLE_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.pihole-https.entrypoints=https
+      - traefik.http.routers.pihole-https.tls=true
+      # Auto redirect to admin panel
+      - traefik.http.routers.pihole-https.middlewares=pihole-admin-redir
+      - traefik.http.middlewares.pihole-admin-redir.redirectregex.regex=^https://${PIHOLE_SUBDOMAIN}.${LOCAL_DOMAIN}/?$$
+      - traefik.http.middlewares.pihole-admin-redir.redirectregex.replacement=https://${PIHOLE_SUBDOMAIN}.${LOCAL_DOMAIN}/admin/
+      - traefik.http.middlewares.pihole-admin-redir.redirectregex.permanent=true
 
 networks:
   traefik-net:

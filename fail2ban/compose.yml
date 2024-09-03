@@ -8,8 +8,8 @@ services:
       - NET_RAW
     network_mode: host
     environment:
-      PUID: ${UID}
-      PGID: ${GID}
+      PUID: ${USER_UID}
+      PGID: ${USER_GID}
       TZ: ${TIMEZONE}
     volumes:
       - ./config:/config

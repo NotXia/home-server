@@ -7,18 +7,14 @@ services:
       - traefik-net
     labels:
       - traefik.enable=true
+      - traefik.http.services.website.loadbalancer.server.port=3000
 
-      - traefik.http.routers.website-http.service=website-http
-      - traefik.http.services.website-http.loadbalancer.server.port=3000
-      - traefik.http.middlewares.redirect-https.redirectscheme.scheme=https
-      - traefik.http.middlewares.redirect-https.redirectscheme.permanent=true
-      - traefik.http.routers.website-http.middlewares=redirect-https
-      - traefik.http.routers.website-http.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.website-http.rule=Host(`${PUBLIC_DOMAIN}`)
       - traefik.http.routers.website-http.entrypoints=http
+      - traefik.http.routers.website-http.middlewares=redirect-https@file
 
-      - traefik.http.routers.website-https.service=website-https
-      - traefik.http.services.website-https.loadbalancer.server.port=3000
-      - traefik.http.routers.website-https.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.website-https.service=website
+      - traefik.http.routers.website-https.rule=Host(`${PUBLIC_DOMAIN}`)
       - traefik.http.routers.website-https.entrypoints=https
       - traefik.http.routers.website-https.tls=true
       - traefik.http.routers.website-https.tls.certresolver=letsencrypt

@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       TZ: ${TIMEZONE}
-      DOMAIN: https://vaultwarden.{DOMAIN}
+      DOMAIN: https://${VW_SUBDOMAIN}.{DOMAIN}
       SIGNUPS_ALLOWED: false
       LOG_FILE: /data/vaultwarden.log
       ADMIN_TOKEN: ${VW_ADMIN_TOKEN}
@@ -22,29 +22,27 @@ services:
     labels:
       - traefik.enable=true
 
-      - traefik.http.routers.vaultwarden-http.service=vaultwarden-http
-      - traefik.http.services.vaultwarden-http.loadbalancer.server.port=80
-      - traefik.http.middlewares.redirect-https.redirectscheme.scheme=https
-      - traefik.http.middlewares.redirect-https.redirectscheme.permanent=true
-      - traefik.http.routers.vaultwarden-http.middlewares=redirect-https
-      - traefik.http.routers.vaultwarden-http.rule=Host(`vaultwarden.${DOMAIN}`)
+      - traefik.http.routers.vaultwarden-http.rule=Host(`${VW_SUBDOMAIN}.${PUBLIC_DOMAIN}`)
       - traefik.http.routers.vaultwarden-http.entrypoints=http
+      - traefik.http.routers.vaultwarden-http.middlewares=redirect-https@file
 
-      - traefik.http.routers.vaultwarden-https.service=vaultwarden-https
-      - traefik.http.services.vaultwarden-https.loadbalancer.server.port=80
-      - traefik.http.routers.vaultwarden-https.rule=Host(`vaultwarden.${DOMAIN}`)
+      - traefik.http.routers.vaultwarden-https.rule=Host(`${VW_SUBDOMAIN}.${PUBLIC_DOMAIN}`)
       - traefik.http.routers.vaultwarden-https.entrypoints=https
       - traefik.http.routers.vaultwarden-https.tls=true
       - traefik.http.routers.vaultwarden-https.tls.certresolver=letsencrypt
-      # Prevent admin access from outside
-      - traefik.http.middlewares.vaultwarden-admin-block.redirectregex.regex=https://vaultwarden.${DOMAIN}/admin
-      - traefik.http.middlewares.vaultwarden-admin-block.redirectregex.replacement=https://vaultwarden.${DOMAIN}
+      # Prevent access to admin panel from outside
       - traefik.http.routers.vaultwarden-https.middlewares=vaultwarden-admin-block
+      - traefik.http.middlewares.vaultwarden-admin-block.redirectregex.regex=https://${VW_SUBDOMAIN}.${PUBLIC_DOMAIN}/admin/?.*
+      - traefik.http.middlewares.vaultwarden-admin-block.redirectregex.replacement=https://${VW_SUBDOMAIN}.${PUBLIC_DOMAIN}
+      - traefik.http.middlewares.vaultwarden-admin-block.redirectregex.permanent=true
 
-      - traefik.http.routers.vaultwarden-local.service=vaultwarden-local
-      - traefik.http.services.vaultwarden-local.loadbalancer.server.port=80
-      - traefik.http.routers.vaultwarden-local.rule=Host(`vaultwarden.local`)
-      - traefik.http.routers.vaultwarden-local.entrypoints=http
+      - traefik.http.routers.vaultwarden-local-http.rule=Host(`${VW_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.vaultwarden-local-http.entrypoints=http
+      - traefik.http.routers.vaultwarden-local-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.vaultwarden-local-https.rule=Host(`${VW_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.vaultwarden-local-https.entrypoints=https
+      - traefik.http.routers.vaultwarden-local-https.tls=true
 
 networks:
   traefik-net:

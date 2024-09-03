@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /certs/local-https.crt
+      keyFile: /certs/local-https.key
