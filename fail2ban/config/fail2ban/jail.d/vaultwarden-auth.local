@@ -1,0 +1,5 @@
+[vaultwarden-auth]
+enabled  = true
+maxretry = 3
+bantime = 1d
+chain = FORWARD

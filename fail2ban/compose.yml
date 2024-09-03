@@ -14,3 +14,4 @@ services:
     volumes:
       - ./config:/config
       - /var/log:/var/log:ro
+      - ../vaultwarden/vw-log:/remotelogs/vaultwarden:ro
