@@ -14,6 +14,7 @@ prompt_y_n () {
 }
 
 ln_env_and_start_compose () {
+    cd $1
     ln -s ../.env .env
     docker compose up -d
     cd ..
@@ -22,7 +23,7 @@ ln_env_and_start_compose () {
 cat << EOF
 Home server installation setup. 
 The following operations will be done:
-  - Creation of a local CA and signed certificate.
+  - Creation of a local CA and signed certificate for the local domain.
   - Initialization of Traefik.
   - Initialization of Pi-hole.
   - Initialization of fail2ban.
@@ -45,30 +46,24 @@ cd local-cert
 cd ..
 
 echo ">>>>>>>>>> Starting Traefik <<<<<<<<<<"
-cd traefik
-ln_env_and_start_compose
+ln_env_and_start_compose traefik
 
 echo ">>>>>>>>>> Starting Pi-hole <<<<<<<<<<"
-cd pihole
-ln_env_and_start_compose
+ln_env_and_start_compose pihole
 
 echo ">>>>>>>>>> Starting fail2ban <<<<<<<<<<"
-cd fail2ban
-ln_env_and_start_compose
+ln_env_and_start_compose fail2ban
 
 echo ">>>>>>>>>> Starting Vaultwarden <<<<<<<<<<"
-cd vaultwarden
-ln_env_and_start_compose
+ln_env_and_start_compose vaultwarden
 
 echo ">>>>>>>>>> Starting WireGuard <<<<<<<<<<"
-cd wireguard
-ln_env_and_start_compose
+ln_env_and_start_compose wireguard
 
 if prompt_y_n "Init my website (I mean, you probably don't want this but who am I to judge)? [y/N]" 1; then
     echo ">>>>>>>>>> Starting personal website <<<<<<<<<<"
     git submodule update website/notxia.github.io
-    cd website
-    ln_env_and_start_compose
+    ln_env_and_start_compose website
 fi
 
 cat << EOF
