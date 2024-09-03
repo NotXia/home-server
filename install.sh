@@ -30,6 +30,16 @@ if prompt_y_n "Start Pi-hole? [Y/n]" 0; then
     ln_env_and_start_compose
 fi
 
+if prompt_y_n "Start fail2ban? [Y/n]" 0; then
+    cd fail2ban
+    ln_env_and_start_compose
+fi
+
+if prompt_y_n "Start Vaultwarden? [Y/n]" 0; then
+    cd vaultwarden
+    ln_env_and_start_compose
+fi
+
 if prompt_y_n "Start WireGuard? [Y/n]" 0; then
     cd wireguard
     ln_env_and_start_compose
