@@ -1,0 +1,16 @@
+services:
+  fail2ban:
+    image: lscr.io/linuxserver/fail2ban:latest
+    container_name: fail2ban
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: host
+    environment:
+      PUID: ${UID}
+      PGID: ${GID}
+      TZ: ${TIMEZONE}
+    volumes:
+      - ./config:/config
+      - /var/log:/var/log:ro

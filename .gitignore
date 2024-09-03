@@ -4,3 +4,11 @@
 !.gitignore
 !.gitmodules
 !/**/compose.yml
+
+!/fail2ban
+!/fail2ban/config
+!/fail2ban/config/fail2ban
+!/fail2ban/config/fail2ban/action.d
+!/fail2ban/config/fail2ban/filter.d
+!/fail2ban/config/fail2ban/jail.d
+!/fail2ban/config/fail2ban/**/*.local
