@@ -1,9 +1,11 @@
 /**
 !/*
 .env
+/backups
 !.gitignore
 !.gitmodules
 !/**/compose.yml
+!/**/backup.sh
 
 !/fail2ban
 !/fail2ban/config

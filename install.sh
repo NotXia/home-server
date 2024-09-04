@@ -68,6 +68,9 @@ fi
 
 cat << EOF
 
-!!!!! Remember to install the CA certificate (./local-cert/ca/local-ca.pem) on the local hosts. !!!!!
+!!!!! REMEMBER TO !!!!!
+- Schedule backups (./backup.sh).
+- Install the CA certificate (./local-cert/ca/local-ca.pem) on the local hosts.
+!!!!!!!!!!!!!!!!!!!!!!!
 
 EOF
