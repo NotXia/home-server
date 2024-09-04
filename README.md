@@ -8,15 +8,17 @@ My home server services setup.
 |:-------:|:------------|
 | Traefik | Reverse proxy |
 | Pi-hole | DNS server |
-| fail2ban | Intrusion detection |
 | Local CA | Self-signed certificate for HTTPS on LAN |
 | Vaultwarden | Password manager |
 | WireGuard | VPN |
+| fail2ban | Intrusion detection for SSH and Vaultwarden |
 
 
-## Installation
+## Setup and installation
 
-Clone the repository and run:
-```
-./install.sh
-```
+1. Rename `.env.example` to `.env`.
+2. Fill the fields in `.env`.
+3. Run:
+    ```
+    ./install.sh
+    ```
