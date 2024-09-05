@@ -10,6 +10,9 @@ services:
       TZ: ${TIMEZONE}
       WEBPASSWORD: ${PIHOLE_WEB_PASSWORD}
       WEBTHEME: default-dark
+      FTLCONF_LOCAL_IPV4: ${LOCAL_IP}
+      PIHOLE_UID: ${USER_UID}
+      PIHOLE_GID: ${USER_GID}
     volumes:
       - ./etc-pihole:/etc/pihole
       - ./etc-dnsmasq.d:/etc/dnsmasq.d
@@ -19,12 +22,7 @@ services:
         ipv4_address: 172.0.0.2
     dns:
       - 127.0.0.11
-      - 127.0.0.1
-    extra_hosts:
-      - ${TRAEFIK_SUBDOMAIN}.${LOCAL_DOMAIN}:${LOCAL_IP}
-      - ${PIHOLE_SUBDOMAIN}.${LOCAL_DOMAIN}:${LOCAL_IP}
-      - ${VW_SUBDOMAIN}.${LOCAL_DOMAIN}:${LOCAL_IP}
-
+      - ${LOCAL_IP}
     labels:
       - traefik.enable=true
       - traefik.http.services.pihole.loadbalancer.server.port=80

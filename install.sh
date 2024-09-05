@@ -49,6 +49,9 @@ echo ">>>>>>>>>> Starting Traefik <<<<<<<<<<"
 ln_env_and_start_compose traefik
 
 echo ">>>>>>>>>> Starting Pi-hole <<<<<<<<<<"
+# Add local domain and subdomains DNS record
+mkdir -p pihole/etc.dnsmasq.d
+echo "address=/$LOCAL_DOMAIN/$LOCAL_IP" >> pihole/etc.dnsmasq.d/local-domain.conf
 ln_env_and_start_compose pihole
 
 echo ">>>>>>>>>> Starting fail2ban <<<<<<<<<<"
