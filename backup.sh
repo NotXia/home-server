@@ -2,11 +2,12 @@
 
 #
 # $1: backups root directory
+# $2: number of recent backups to keep
 #
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
-KEEP_AMOUNT=14 # Number of recent backups to keep
+KEEP_AMOUNT=$2
 BACKUP_ROOT=$1
 BACKUP_DIR=$BACKUP_ROOT/$(date +%Y-%m-%d_%H.%M.%S)
 
