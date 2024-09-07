@@ -29,6 +29,7 @@ The following operations will be done:
   - Initialization of fail2ban.
   - Initialization of Vaultwarden.
   - Initialization of WireGuard.
+  - Initialization of Who's there?.
 EOF
 
 
@@ -37,7 +38,8 @@ if ! prompt_y_n "Proceed? [y/N]" 1; then
 fi
 
 # Load .env
-export $(cat .env | xargs)
+export $(grep -v '^#' .env | xargs)
+
 
 echo "Creating local CA"
 cd local-cert
@@ -45,8 +47,10 @@ cd local-cert
 ./create-signed-cert.sh $LOCAL_DOMAIN
 cd ..
 
+
 echo ">>>>>>>>>> Starting Traefik <<<<<<<<<<"
 ln_env_and_start_compose traefik
+
 
 echo ">>>>>>>>>> Starting Pi-hole <<<<<<<<<<"
 # Add local domain and subdomains DNS record
@@ -54,14 +58,39 @@ mkdir -p pihole/etc.dnsmasq.d
 echo "address=/$LOCAL_DOMAIN/$LOCAL_IP" >> pihole/etc.dnsmasq.d/local-domain.conf
 ln_env_and_start_compose pihole
 
+
 echo ">>>>>>>>>> Starting fail2ban <<<<<<<<<<"
 ln_env_and_start_compose fail2ban
+
 
 echo ">>>>>>>>>> Starting Vaultwarden <<<<<<<<<<"
 ln_env_and_start_compose vaultwarden
 
+
 echo ">>>>>>>>>> Starting WireGuard <<<<<<<<<<"
 ln_env_and_start_compose wireguard
+
+
+echo ">>>>>>>>>> Starting Who's there? <<<<<<<<<<"
+cat > ./fail2ban/config/fail2ban/jail.local << EOF
+[Definition]
+actionban = curl -k -X POST <domain>/api/bans -H 'Content-Type: application/json' -d '{"ip": "<ip>", "jail_name": "%(name)s", "timestamp": <time>}'
+
+[Init]
+domain = https://localhost
+EOF
+
+cat > ./fail2ban/config/fail2ban/action.d/whos-there.local << EOF
+[DEFAULT]
+
+action = %(action_)s
+         whos-there[domain="https://${WHOSTHERE_SUBDOMAIN}.${LOCAL_DOMAIN}"]
+EOF
+ln_env_and_start_compose whos-there
+cd fail2ban
+docker compose restart
+cd ..
+
 
 if prompt_y_n "Init my website (I mean, you probably don't want this but who am I to judge)? [y/N]" 1; then
     echo ">>>>>>>>>> Starting personal website <<<<<<<<<<"

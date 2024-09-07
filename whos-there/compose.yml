@@ -1,0 +1,29 @@
+services:
+  whosthere:
+    image: ghcr.io/notxia/fail2ban-whos-there:latest
+    container_name: whosthere
+    restart: unless-stopped
+    environment:
+      TZ: ${TIMEZONE}
+      PUBLIC_URL: 'https://${WHOSTHERE_SUBDOMAIN}.${LOCAL_DOMAIN}'
+      DB_PATH: /ban-data/db.sqlite
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.whosthere.loadbalancer.server.port=3000
+
+      - traefik.http.routers.whosthere-http.rule=Host(`${WHOSTHERE_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.whosthere-http.entrypoints=http
+      - traefik.http.routers.whosthere-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.whosthere-https.service=whosthere
+      - traefik.http.routers.whosthere-https.rule=Host(`${WHOSTHERE_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.whosthere-https.entrypoints=https
+      - traefik.http.routers.whosthere-https.tls=true
+    volumes:
+      - ./data:/ban-data
+
+networks:
+  traefik-net:
+    external: true

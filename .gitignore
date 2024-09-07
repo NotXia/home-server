@@ -14,6 +14,8 @@
 !/fail2ban/config/fail2ban/filter.d
 !/fail2ban/config/fail2ban/jail.d
 !/fail2ban/config/fail2ban/**/*.local
+fail2ban/config/fail2ban/jail.local
+fail2ban/config/fail2ban/action.d/whos-there.local
 
 !/local-cert/*.sh
 !/traefik
