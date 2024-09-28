@@ -72,15 +72,14 @@ ln_env_and_start_compose wireguard
 
 
 echo ">>>>>>>>>> Starting Who's there? <<<<<<<<<<"
-cat > ./fail2ban/config/fail2ban/jail.local << EOF
+cat > ./fail2ban/config/fail2ban/action.d/whos-there.local << EOF
 [Definition]
 actionban = curl -k -X POST <domain>/api/bans -H 'Content-Type: application/json' -d '{"ip": "<ip>", "jail_name": "%(name)s", "timestamp": <time>}'
 
 [Init]
 domain = https://localhost
 EOF
-
-cat > ./fail2ban/config/fail2ban/action.d/whos-there.local << EOF
+cat > ./fail2ban/config/fail2ban/jail.local << EOF
 [DEFAULT]
 
 action = %(action_)s
