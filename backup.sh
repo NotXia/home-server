@@ -38,6 +38,8 @@ runBackupSh vaultwarden
 echo "Backing up WireGuard"
 runBackupSh wireguard
 
+echo "Backing up Mealie"
+runBackupSh mealie
 
 echo "Removing old backups"
 cd $BACKUP_ROOT

@@ -1,0 +1,47 @@
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    container_name: mealie
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    networks:
+      - traefik-net
+    environment:
+      TZ: ${TIMEZONE}
+      ALLOW_SIGNUP: false
+      PUID: ${USER_UID}
+      PGID: ${USER_GID}
+      MAX_WORKERS: 1
+      WEB_CONCURRENCY: 1
+      BASE_URL: 'https://${MEALIE_SUBDOMAIN}.${LOCAL_DOMAIN}'
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.mealie.loadbalancer.server.port=9000
+
+      - traefik.http.routers.mealie-http-local.rule=Host(`${MEALIE_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.mealie-http-local.entrypoints=http
+      - traefik.http.routers.mealie-http-local.middlewares=redirect-https@file
+
+      - traefik.http.routers.mealie-https-local.service=mealie
+      - traefik.http.routers.mealie-https-local.rule=Host(`${MEALIE_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.mealie-https-local.entrypoints=https
+      - traefik.http.routers.mealie-https-local.tls=true
+
+      - traefik.http.routers.mealie-http.rule=Host(`${MEALIE_SUBDOMAIN}.${PUBLIC_DOMAIN}`)
+      - traefik.http.routers.mealie-http.entrypoints=http
+      - traefik.http.routers.mealie-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.mealie-https.service=mealie
+      - traefik.http.routers.mealie-https.rule=Host(`${MEALIE_SUBDOMAIN}.${PUBLIC_DOMAIN}`)
+      - traefik.http.routers.mealie-https.entrypoints=https
+      - traefik.http.routers.mealie-https.tls=true
+      - traefik.http.routers.mealie-https.tls.certresolver=letsencrypt
+    volumes:
+      - ./data:/app/data/
+
+networks:
+  traefik-net:
+    external: true
