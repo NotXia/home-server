@@ -1,0 +1,27 @@
+services:
+  actual:
+    image: docker.io/actualbudget/actual-server:latest
+    container_name: actual
+    restart: unless-stopped
+    networks:
+      - traefik-net
+    environment:
+      TZ: ${TIMEZONE}
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.actual.loadbalancer.server.port=5006
+
+      - traefik.http.routers.actual-http-local.rule=Host(`${ACTUAL_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.actual-http-local.entrypoints=http
+      - traefik.http.routers.actual-http-local.middlewares=redirect-https@file
+
+      - traefik.http.routers.actual-https-local.service=actual
+      - traefik.http.routers.actual-https-local.rule=Host(`${ACTUAL_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.actual-https-local.entrypoints=https
+      - traefik.http.routers.actual-https-local.tls=true
+    volumes:
+      - ./data:/data
+
+networks:
+  traefik-net:
+    external: true

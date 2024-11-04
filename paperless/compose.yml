@@ -1,0 +1,67 @@
+services:
+  broker:
+    image: docker.io/library/redis:7
+    container_name: paperless-redis
+    restart: unless-stopped
+    volumes:
+      - ./redisdata:/data
+    networks:
+      paperless-net:
+
+  db:
+    image: docker.io/library/postgres:16
+    container_name: paperless-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    networks:
+      paperless-net:
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+    ports:
+      - "8000:8000"
+    environment:
+      PAPERLESS_TIME_ZONE: ${TIMEZONE}
+      PAPERLESS_REDIS: redis://paperless-redis:6379
+      PAPERLESS_DBHOST: paperless-postgres
+      PAPERLESS_URL: https://${PAPERLESS_SUBDOMAIN}.${LOCAL_DOMAIN}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}
+    volumes:
+      - ./data:/usr/src/paperless/data
+      - ./media:/usr/src/paperless/media
+      - ./export:/usr/src/paperless/export
+      - ./consume:/usr/src/paperless/consume
+    networks:
+      paperless-net:
+      traefik-net:
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.paperless.loadbalancer.server.port=8000
+
+      - traefik.http.routers.paperless-http.rule=Host(`${PAPERLESS_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.paperless-http.entrypoints=http
+      - traefik.http.routers.paperless-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.paperless-https.service=paperless
+      - traefik.http.routers.paperless-https.rule=Host(`${PAPERLESS_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.paperless-https.entrypoints=https
+      - traefik.http.routers.paperless-https.tls=true
+
+
+networks:
+  paperless-net:
+    external: false
+    name: paperless-net
+  traefik-net:
+    external: true

@@ -41,6 +41,13 @@ runBackupSh wireguard
 echo "Backing up Mealie"
 runBackupSh mealie
 
+echo "Backing up Actual"
+runBackupSh actual
+
+echo "Backing up Paperless"
+runBackupSh paperless
+
+
 echo "Removing old backups"
 cd $BACKUP_ROOT
 SKIP_LINES=$(($KEEP_AMOUNT+2))
