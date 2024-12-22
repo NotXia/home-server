@@ -15,6 +15,7 @@ services:
       - --certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_LE_EMAIL}
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       - --providers.file.directory=/etc/traefik/dynamic
+      - --accesslog.filePath=/var/log/access.log
     ports:
       - 80:80
       - 443:443
@@ -23,6 +24,7 @@ services:
       - ./dynamic:/etc/traefik/dynamic:ro
       - ./letsencrypt:/letsencrypt
       - ../local-cert/https:/certs
+      - ./logs:/var/log
     networks:
       - traefik-net
     labels:

@@ -1,0 +1,62 @@
+services:
+  goaccess:
+    image: allinurl/goaccess
+    container_name: goaccess-back
+    restart: unless-stopped
+    command:
+      - /goaccess/logs/access.log
+      - --output=/goaccess/report/index.html
+      - --real-time-html
+      - --origin=https://${GOACCESS_SUBDOMAIN}.${LOCAL_DOMAIN}
+      - --ws-url=wss://${GOACCESS_SUBDOMAIN}.${LOCAL_DOMAIN}:443/ws
+      - --log-format=TRAEFIKCLF
+      - --db-path=/goaccess/data
+      - --persist
+      - --restore
+    environment:
+      TZ: ${TIMEZONE}
+    volumes:
+    - ../traefik/logs:/goaccess/logs:ro
+    - ./report:/goaccess/report
+    - ./data:/goaccess/data
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.goaccess-ws.loadbalancer.server.port=7890
+
+      - traefik.http.routers.goaccess-ws-http.rule=Host(`${GOACCESS_SUBDOMAIN}.${LOCAL_DOMAIN}`) && PathPrefix(`/ws`)
+      - traefik.http.routers.goaccess-ws-http.entrypoints=http
+      - traefik.http.routers.goaccess-ws-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.goaccess-ws-https.service=goaccess-ws
+      - traefik.http.routers.goaccess-ws-https.rule=Host(`${GOACCESS_SUBDOMAIN}.${LOCAL_DOMAIN}`) && PathPrefix(`/ws`)
+      - traefik.http.routers.goaccess-ws-https.entrypoints=https
+      - traefik.http.routers.goaccess-ws-https.tls=true
+
+  nginx:
+    image: nginx:alpine
+    container_name: goaccess-front
+    restart: unless-stopped
+    depends_on:
+      - goaccess
+    volumes:
+      - ./report:/usr/share/nginx/html:ro 
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.goaccess-http.rule=Host(`${GOACCESS_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.goaccess-http.entrypoints=http
+      - traefik.http.routers.goaccess-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.goaccess-https.rule=Host(`${GOACCESS_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.goaccess-https.entrypoints=https
+      - traefik.http.routers.goaccess-https.tls=true
+
+
+networks:
+  traefik-net:
+    external: true
+    name: traefik-net
