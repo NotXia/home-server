@@ -13,13 +13,8 @@ My home server services setup.
 | [WireGuard](https://www.wireguard.com/) | VPN |
 | [fail2ban](https://github.com/fail2ban/fail2ban) | Intrusion detection for SSH and Vaultwarden |
 | [Who's there?](https://github.com/NotXia/fail2ban-whos-there) | fail2ban monitoring |
-
-
-## Setup and installation
-
-1. Rename `.env.example` to `.env`.
-2. Fill the fields in `.env`.
-3. Run:
-    ```
-    ./install.sh
-    ```
+| [GoAccess](https://goaccess.io/) | Web logs analyzer |
+| [Mealie](https://mealie.io/) | Recipes manager |
+| [Actual](https://actualbudget.org/) | Budgeting |
+| [Paperless](https://docs.paperless-ngx.com/) | Document manager |
+| [Synapse + Element](https://element-hq.github.io/synapse/latest/) | Matrix |
