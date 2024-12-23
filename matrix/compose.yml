@@ -1,0 +1,104 @@
+# docker-compose run --rm -e SYNAPSE_SERVER_NAME={my.matrix.host} -e SYNAPSE_REPORT_STATS=yes -e UID={uid} -e GID={gid} synapse generate
+
+
+services:
+  db:
+    image: docker.io/postgres:12-alpine
+    container_name: matrix-db
+    hostname: matrix-db
+    restart: unless-stopped
+    environment:
+      TZ: ${TIMEZONE}
+      UID: ${USER_UID}
+      GID: ${USER_GID}
+      POSTGRES_USER: synapse
+      POSTGRES_PASSWORD: ${SYNAPSE_DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    networks:
+      - matrix-net
+
+
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: matrix-back
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      TZ: ${TIMEZONE}
+      UID: ${USER_UID}
+      GID: ${USER_GID}
+      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+    volumes:
+      - ./synapse_data:/data
+    networks:
+      - traefik-net
+      - matrix-net
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.synapse.loadbalancer.server.port=8008
+
+      - traefik.http.routers.synapse-http.rule=Host(`${SYNAPSE_SUBDOMAIN}.${PUBLIC_DOMAIN}`)
+      - traefik.http.routers.synapse-http.entrypoints=http
+      - traefik.http.routers.synapse-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.synapse-https.service=synapse
+      - traefik.http.routers.synapse-https.rule=Host(`${SYNAPSE_SUBDOMAIN}.${PUBLIC_DOMAIN}`)
+      - traefik.http.routers.synapse-https.entrypoints=https
+      - traefik.http.routers.synapse-https.tls=true
+      - traefik.http.routers.synapse-https.tls.certresolver=letsencrypt
+
+
+  element:
+    image: vectorim/element-web:latest
+    container_name: matrix-front
+    restart: unless-stopped
+    environment:
+      TZ: ${TIMEZONE}
+      UID: ${USER_UID}
+      GID: ${USER_GID}
+    volumes:
+      - ./element_data/config.json:/app/config.json
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.element-http.rule=Host(`${ELEMENT_SUBDOMAIN}.${PUBLIC_DOMAIN}`)
+      - traefik.http.routers.element-http.entrypoints=http
+      - traefik.http.routers.element-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.element-https.rule=Host(`${ELEMENT_SUBDOMAIN}.${PUBLIC_DOMAIN}`)
+      - traefik.http.routers.element-https.entrypoints=https
+      - traefik.http.routers.element-https.tls=true
+      - traefik.http.routers.element-https.tls.certresolver=letsencrypt
+
+
+  synapse-admin:
+    image: ghcr.io/etkecc/synapse-admin:latest
+    container_name: matrix-admin-front
+    restart: unless-stopped
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+
+      - traefik.http.routers.synapse-admin-http.rule=Host(`${SYNAPSE_ADMIN_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.synapse-admin-http.entrypoints=http
+      - traefik.http.routers.synapse-admin-http.middlewares=redirect-https@file
+
+      - traefik.http.routers.synapse-admin-https.rule=Host(`${SYNAPSE_ADMIN_SUBDOMAIN}.${LOCAL_DOMAIN}`)
+      - traefik.http.routers.synapse-admin-https.entrypoints=https
+      - traefik.http.routers.synapse-admin-https.tls=true
+
+
+networks:
+  traefik-net:
+    external: true
+    name: traefik-net
+  
+  matrix-net:
+    name: matrix-net
+    external: false

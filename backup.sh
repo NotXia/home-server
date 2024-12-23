@@ -47,6 +47,9 @@ runBackupSh actual
 echo "Backing up Paperless"
 runBackupSh paperless
 
+echo "Backing up Matrix"
+runBackupSh matrix
+
 
 echo "Removing old backups"
 cd $BACKUP_ROOT
