@@ -7,6 +7,8 @@
 !/**/compose.yml
 !/**/backup.sh
 
+!/website/pull.sh
+
 !/fail2ban
 !/fail2ban/config
 !/fail2ban/config/fail2ban
