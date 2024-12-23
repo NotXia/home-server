@@ -15,7 +15,7 @@ services:
     environment:
       POSTGRES_DB: paperless
       POSTGRES_USER: paperless
-      POSTGRES_PASSWORD: paperless
+      POSTGRES_PASSWORD: ${PAPERLESS_DB_PASSWORD}
     volumes:
       - ./pgdata:/var/lib/postgresql/data
     networks:
@@ -34,6 +34,7 @@ services:
       PAPERLESS_TIME_ZONE: ${TIMEZONE}
       PAPERLESS_REDIS: redis://paperless-redis:6379
       PAPERLESS_DBHOST: paperless-postgres
+      PAPERLESS_DBPASS: ${PAPERLESS_DB_PASSWORD}
       PAPERLESS_URL: https://${PAPERLESS_SUBDOMAIN}.${LOCAL_DOMAIN}
       PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE}
