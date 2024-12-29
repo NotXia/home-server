@@ -51,6 +51,38 @@ services:
       - traefik.http.routers.synapse-https.tls.certresolver=letsencrypt
 
 
+  coturn:
+    image: coturn/coturn:alpine
+    container_name: coturn
+    restart: unless-stopped
+    command:
+      - --realm=${PUBLIC_DOMAIN}
+      - --use-auth-secret
+      - --static-auth-secret=${COTURN_SECRET}
+      - --no-stun
+      - --no-tcp-relay
+      - --cert=/tls/notxia.duckdns.org.crt
+      - --pkey=/tls/notxia.duckdns.org.key
+      - --user-quota=12
+      - --no-cli
+      - --min-port=50000 
+      - --max-port=50500
+    user: 
+      ${USER_UID}:${USER_GID}
+    environment:
+      DETECT_EXTERNAL_IP: yes
+      DETECT_RELAY_IP: yes
+    ports:
+      - 3478:3478 
+      - 3478:3478/udp 
+      - 5349:5349 
+      - 5349:5349/udp 
+      - 50000-50500:50000-50500/udp
+    volumes:
+      - ./coturn-tls/${PUBLIC_DOMAIN}.crt:/tls/${PUBLIC_DOMAIN}.crt:ro
+      - ./coturn-tls/${PUBLIC_DOMAIN}.key:/tls/${PUBLIC_DOMAIN}.key:ro
+
+
   element:
     image: vectorim/element-web:latest
     container_name: matrix-front
