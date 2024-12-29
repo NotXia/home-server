@@ -1,3 +1,7 @@
 #! /bin/bash
 
-tar -czf $2/ca_$1.tag.gz ./ca ./https
+#
+# $1: restic repository path
+#
+
+restic --repo $1 backup --tag local-ca ./ca ./https

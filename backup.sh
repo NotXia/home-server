@@ -1,30 +1,27 @@
 #! /bin/bash
 
 #
-# $1: backups root directory
-# $2: number of recent backups to keep
+# $1: restic repository path
+# $2: number of recent snapshots to keep
 #
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-TIMESTAMP=$(date +%Y%m%d%H%M%S)
+RESTIC_REPO=$1
 KEEP_AMOUNT=$2
-BACKUP_ROOT=$1
-BACKUP_DIR=$BACKUP_ROOT/$(date +%Y-%m-%d_%H.%M.%S)
 
-
-cd $SCRIPT_DIR
-mkdir -p $BACKUP_DIR
+export RESTIC_PASSWORD_FILE=$SCRIPT_DIR/.restic
+restic init --repo $RESTIC_REPO &> /dev/null
 
 
 runBackupSh () {
     cd $1
-    ./backup.sh $TIMESTAMP $BACKUP_DIR
+    ./backup.sh $RESTIC_REPO
     cd ..
 }
 
 
 echo "Backing up .env"
-cp .env $BACKUP_DIR/.env.bckp
+restic --repo $RESTIC_REPO backup --tag env .env
 
 echo "Backing up CA certificates"
 runBackupSh local-cert
@@ -51,7 +48,5 @@ echo "Backing up Matrix"
 runBackupSh matrix
 
 
-echo "Removing old backups"
-cd $BACKUP_ROOT
-SKIP_LINES=$(($KEEP_AMOUNT+2))
-ls -lt | tail -n +$SKIP_LINES | awk '{print $9}' | xargs rm -r
+echo "Removing old snapshots"
+restic --repo $RESTIC_REPO forget --prune --group-by tags --keep-last $KEEP_AMOUNT

@@ -1,6 +1,9 @@
 #! /bin/bash
 
-mkdir .vaultwarden_bckp
-sqlite3 vw-data/db.sqlite3 ".backup '.vaultwarden_bckp/db.sqlite3'"
-tar -czf $2/vaultwarden_$1.tar.gz .vaultwarden_bckp
-rm -rf .vaultwarden_bckp
+#
+# $1: restic repository path
+#
+
+sqlite3 vw-data/db.sqlite3 ".backup 'db.sqlite3'"
+restic --repo $1 backup --tag vaultwarden db.sqlite3
+rm db.sqlite3

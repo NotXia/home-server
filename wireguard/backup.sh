@@ -1,3 +1,7 @@
 #! /bin/bash
 
-tar -czf $2/wireguard_$1.tar.gz ./config
+#
+# $1: restic repository path
+#
+
+restic --repo $1 backup --tag wireguard ./config

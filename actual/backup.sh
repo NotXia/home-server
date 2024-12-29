@@ -1,5 +1,9 @@
 #! /bin/bash
 
+#
+# $1: restic repository path
+#
+
 docker compose stop
-tar -czf $2/actual_$1.tar.gz ./data
+restic --repo $1 backup --tag actual ./data
 docker compose start

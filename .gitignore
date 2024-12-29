@@ -6,6 +6,8 @@
 !.gitmodules
 !/**/compose.yml
 !/**/backup.sh
+.restic
+/backups-restic
 
 !/website/pull.sh
 
@@ -23,3 +25,6 @@ fail2ban/config/fail2ban/action.d/whos-there.local
 !/traefik
 !/traefik/dynamic
 !/traefik/dynamic/*
+
+!/traefik/dumpacme.sh
+!/matrix/refresh_coturn_tls.sh
