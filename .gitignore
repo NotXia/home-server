@@ -5,10 +5,14 @@
 !.gitignore
 !.gitmodules
 !/**/compose.yml
-!/**/backup.sh
+!/**/backup.setup.sh
+!/**/backup.create.sh
+!/**/backup.cleanup.sh
+!/**/backup.media.sh
 .restic
 /backups-restic
-
+/*.log
+backup.cron.sh
 !/website/pull.sh
 
 !/fail2ban
